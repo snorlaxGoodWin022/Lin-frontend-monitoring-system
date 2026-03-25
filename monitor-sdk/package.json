@@ -1,0 +1,37 @@
+{
+  "name": "monitor-sdk",
+  "version": "1.0.0",
+  "description": "前端监控SDK - 性能监控、错误监控、埋点追踪",
+  "main": "dist/monitor-sdk.cjs.js",
+  "module": "dist/monitor-sdk.esm.js",
+  "browser": "dist/monitor-sdk.min.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest"
+  },
+  "keywords": [
+    "monitor",
+    "performance",
+    "error",
+    "tracking",
+    "analytics",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@rollup/plugin-babel": "^6.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^0.4.0",
+    "rollup": "^4.0.0"
+  },
+  "dependencies": {
+    "pako": "^2.1.0"
+  }
+}
