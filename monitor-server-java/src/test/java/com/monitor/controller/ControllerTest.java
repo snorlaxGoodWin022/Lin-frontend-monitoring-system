@@ -9,6 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,18 +30,27 @@ class ControllerTest {
     @Mock ReportService reportService;
     @Mock QueryService queryService;
     @Mock DashboardService dashboardService;
+    @Mock MongoTemplate mongoTemplate;
+    @Mock StringRedisTemplate redisTemplate;
+    @Mock RedisConnectionFactory redisConnectionFactory;
+    @Mock RedisConnection redisConnection;
 
     // ========== HealthController ==========
 
     @Test
     @DisplayName("GET /health 返回 200 和 status:ok")
     void health() throws Exception {
-        MockMvc mvc = MockMvcBuilders.standaloneSetup(new HealthController()).build();
+        when(redisTemplate.getConnectionFactory()).thenReturn(redisConnectionFactory);
+        when(redisConnectionFactory.getConnection()).thenReturn(redisConnection);
+
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new HealthController(mongoTemplate, redisTemplate)).build();
 
         mvc.perform(get("/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ok"))
-                .andExpect(jsonPath("$.timestamp").isNumber());
+                .andExpect(jsonPath("$.timestamp").isNumber())
+                .andExpect(jsonPath("$.mongodb").value("up"))
+                .andExpect(jsonPath("$.redis").value("up"));
     }
 
     // ========== ReportController ==========

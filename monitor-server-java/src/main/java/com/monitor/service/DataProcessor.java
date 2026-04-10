@@ -1,19 +1,18 @@
 package com.monitor.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.regex.Pattern;
 
-/**
- * 数据处理工具：URL 脱敏、UA 解析、时间戳转换
- * 移植自 monitor-server/src/utils/processor.js
- */
 @Service
 public class DataProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(DataProcessor.class);
 
     private final Set<String> sensitiveParams;
 
@@ -21,41 +20,36 @@ public class DataProcessor {
         this.sensitiveParams = new HashSet<>(Arrays.asList(params.split(",")));
     }
 
-    /**
-     * 验证上报数据：每条记录必须包含 appId 和 timestamp
-     */
     public String validate(List<Map<String, Object>> events) {
         if (events == null || events.isEmpty()) {
+            log.warn("Received null or empty events list");
             return "Data must be non-empty array";
         }
-        for (Map<String, Object> event : events) {
+        for (int i = 0; i < events.size(); i++) {
+            Map<String, Object> event = events.get(i);
             if (event.get("appId") == null) {
+                log.warn("Event at index {} missing appId", i);
                 return "appId is required";
             }
             if (event.get("timestamp") == null) {
+                log.warn("Event at index {} missing timestamp", i);
                 return "timestamp is required";
             }
         }
+        log.debug("Validated {} events", events.size());
         return null;
     }
 
-    /**
-     * 清洗数据：URL 脱敏、时间戳转换、UA 解析
-     */
     public void cleanData(Map<String, Object> event) {
-        // URL 脱敏
         if (event.get("url") instanceof String url) {
             event.put("url", desensitizeUrl(url));
         }
 
-        // 时间戳转换（SDK 发送毫秒时间戳）
         Object ts = event.get("timestamp");
         if (ts instanceof Number) {
-            // 保持为毫秒时间戳，存入 MongoDB 时由 Spring Data 自动转换
             event.put("timestamp", new Date(((Number) ts).longValue()));
         }
 
-        // UA 解析
         Object ua = event.get("userAgent");
         if (ua instanceof String uaStr) {
             event.put("browser", extractBrowser(uaStr));
@@ -64,9 +58,6 @@ public class DataProcessor {
         }
     }
 
-    /**
-     * URL 脱敏：移除敏感查询参数（token, password, key, secret）
-     */
     public String desensitizeUrl(String url) {
         try {
             URI uri = new URI(url);
@@ -90,13 +81,11 @@ public class DataProcessor {
             return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(),
                     uri.getPath(), newQuery.toString(), uri.getFragment()).toString();
         } catch (URISyntaxException e) {
+            log.warn("Failed to parse URL for desensitization: {}", url);
             return url;
         }
     }
 
-    /**
-     * 提取浏览器名称（注意顺序：Chrome UA 也包含 Safari，需先匹配 Chrome）
-     */
     public String extractBrowser(String ua) {
         if (ua.contains("Edg")) return "Edge";
         if (ua.contains("Chrome")) return "Chrome";
@@ -105,9 +94,6 @@ public class DataProcessor {
         return "Unknown";
     }
 
-    /**
-     * 提取操作系统
-     */
     public String extractPlatform(String ua) {
         if (ua.contains("Windows")) return "Windows";
         if (ua.contains("Mac")) return "MacOS";
@@ -117,9 +103,6 @@ public class DataProcessor {
         return "Unknown";
     }
 
-    /**
-     * 提取设备类型
-     */
     public String extractDevice(String ua) {
         if (ua.contains("Mobile") || ua.contains("iPhone")) return "Mobile";
         if (ua.contains("Tablet") || ua.contains("iPad")) return "Tablet";

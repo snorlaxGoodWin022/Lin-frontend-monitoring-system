@@ -3,6 +3,8 @@ package com.monitor.service;
 import com.monitor.model.BehaviorDocument;
 import com.monitor.model.ErrorDocument;
 import com.monitor.model.PerformanceDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -12,12 +14,10 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 数据查询服务
- * 移植自 monitor-server/src/api/query.js
- */
 @Service
 public class QueryService {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryService.class);
 
     private final MongoTemplate mongoTemplate;
 
@@ -58,6 +58,9 @@ public class QueryService {
 
         query.with(Sort.by(Sort.Direction.DESC, "timestamp"));
         query.limit(limit);
+
+        log.debug("Built query: appId={}, type={}, startTime={}, endTime={}, limit={}",
+                appId, type, startTime, endTime, limit);
         return query;
     }
 }

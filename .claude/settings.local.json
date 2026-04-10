@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -L -o /d/softIT/Maven/maven.zip \"https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip\")",
+      "Bash(mv \"/d/softIT/Java-Jdk/jdk-17.0.13+11\" /d/softIT/Java-Jdk/jdk-17)",
+      "Read(//d/softIT/Java-Jdk/jdk-17/bin/**)",
+      "Bash(setx JAVA_HOME \"D:\\\\\\\\softIT\\\\\\\\Java-Jdk\\\\\\\\jdk-17\" /M)",
+      "Bash(setx JAVA_HOME \"D:\\\\\\\\softIT\\\\\\\\Java-Jdk\\\\\\\\jdk-17\")",
+      "Bash(setx MAVEN_HOME \"D:\\\\\\\\softIT\\\\\\\\Maven\\\\\\\\apache-maven\" /M)",
+      "Bash(setx MAVEN_HOME \"D:\\\\\\\\softIT\\\\\\\\Maven\\\\\\\\apache-maven\")",
+      "Bash(export JAVA_HOME=\"/d/softIT/Java-Jdk/jdk-17\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:/d/softIT/Maven/apache-maven/bin:$PATH\")",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(powershell -Command '$currentPath = [System.Environment]::GetEnvironmentVariable\\('\\\\''Path'\\\\'', '\\\\''User'\\\\''\\); $newPath = $currentPath + '\\\\'';D:\\\\softIT\\\\Java-Jdk\\\\jdk-17\\\\bin;D:\\\\softIT\\\\Maven\\\\apache-maven\\\\bin'\\\\''; [System.Environment]::SetEnvironmentVariable\\('\\\\''Path'\\\\'', $newPath, '\\\\''User'\\\\''\\); Write-Output '\\\\''PATH updated successfully'\\\\''')",
+      "Bash(mvn compile:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(mvn dependency:tree -f /d/CodeProject/Code_Point/Frontend-Monitoring-System/monitor-server-java/pom.xml)",
+      "Bash(mvn test:*)"
+    ]
+  }
+}

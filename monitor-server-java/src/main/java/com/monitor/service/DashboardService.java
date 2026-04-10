@@ -1,5 +1,7 @@
 package com.monitor.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -8,12 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-/**
- * Dashboard 聚合统计服务
- * 移植自 monitor-server/src/api/dashboard.js
- */
 @Service
 public class DashboardService {
+
+    private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
 
     private final MongoTemplate mongoTemplate;
     private final RedisStatsService redisStatsService;
@@ -23,18 +23,14 @@ public class DashboardService {
         this.redisStatsService = redisStatsService;
     }
 
-    /**
-     * 从 Redis 获取实时统计数据
-     */
     public Map<String, Long> getStats(String appId) {
+        log.debug("Fetching stats for appId={}", appId);
         return redisStatsService.getStats(appId);
     }
 
-    /**
-     * 性能趋势：按小时聚合 Web Vitals 平均值
-     */
     public List<Map> getPerformanceTrend(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
+        log.debug("Fetching performance trend: appId={}, hours={}", appId, hours);
 
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("appId").is(appId)
@@ -57,11 +53,9 @@ public class DashboardService {
         return mongoTemplate.aggregate(aggregation, "performances", Map.class).getMappedResults();
     }
 
-    /**
-     * 错误分布：按错误类型分组统计
-     */
     public List<Map> getErrorDistribution(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
+        log.debug("Fetching error distribution: appId={}, hours={}", appId, hours);
 
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("appId").is(appId)
@@ -73,13 +67,11 @@ public class DashboardService {
         return mongoTemplate.aggregate(aggregation, "errors", Map.class).getMappedResults();
     }
 
-    /**
-     * PV/UV 统计：按小时聚合页面浏览量和独立访客数
-     */
     public Map<String, List<Map>> getPvUv(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
+        log.debug("Fetching PV/UV: appId={}, hours={}", appId, hours);
 
-        // PV 聚合：按小时统计 page_view 总数
+        // PV 聚合
         Aggregation pvAgg = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("appId").is(appId)
                         .and("type").is("page_view")
@@ -95,7 +87,7 @@ public class DashboardService {
         );
         List<Map> pvData = mongoTemplate.aggregate(pvAgg, "behaviors", Map.class).getMappedResults();
 
-        // UV 聚合：先按小时+userId 去重，再按小时计数
+        // UV 聚合
         Aggregation uvAgg = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("appId").is(appId)
                         .and("type").is("page_view")
