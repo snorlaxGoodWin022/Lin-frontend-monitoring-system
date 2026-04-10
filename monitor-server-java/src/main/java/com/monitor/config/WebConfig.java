@@ -9,6 +9,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    private static final int MAX_POST_SIZE = 10 * 1024 * 1024; // 10MB
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -20,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public TomcatConnectorCustomizer connectorCustomizer() {
-        return connector -> connector.setProperty("maxPostSize", String.valueOf(10 * 1024 * 1024)); // 10MB
+        return connector -> connector.setProperty("maxPostSize", String.valueOf(MAX_POST_SIZE));
     }
 }

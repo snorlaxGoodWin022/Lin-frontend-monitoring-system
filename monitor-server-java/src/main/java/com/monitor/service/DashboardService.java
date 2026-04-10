@@ -14,6 +14,9 @@ import java.util.*;
 public class DashboardService {
 
     private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
+    private static final String PERFORMANCE_COLLECTION = "performances";
+    private static final String ERROR_COLLECTION = "errors";
+    private static final String BEHAVIOR_COLLECTION = "behaviors";
 
     private final MongoTemplate mongoTemplate;
     private final RedisStatsService redisStatsService;
@@ -28,7 +31,8 @@ public class DashboardService {
         return redisStatsService.getStats(appId);
     }
 
-    public List<Map> getPerformanceTrend(String appId, int hours) {
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> getPerformanceTrend(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
         log.debug("Fetching performance trend: appId={}, hours={}", appId, hours);
 
@@ -50,10 +54,13 @@ public class DashboardService {
                 Aggregation.sort(Sort.by(Sort.Direction.ASC, "_id"))
         );
 
-        return mongoTemplate.aggregate(aggregation, "performances", Map.class).getMappedResults();
+        List<Map<String, Object>> results = (List) mongoTemplate.aggregate(aggregation, PERFORMANCE_COLLECTION, Map.class).getMappedResults();
+        log.debug("Performance trend returned {} data points", results.size());
+        return results;
     }
 
-    public List<Map> getErrorDistribution(String appId, int hours) {
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> getErrorDistribution(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
         log.debug("Fetching error distribution: appId={}, hours={}", appId, hours);
 
@@ -64,10 +71,13 @@ public class DashboardService {
                 Aggregation.sort(Sort.by(Sort.Direction.DESC, "count"))
         );
 
-        return mongoTemplate.aggregate(aggregation, "errors", Map.class).getMappedResults();
+        List<Map<String, Object>> results = (List) mongoTemplate.aggregate(aggregation, ERROR_COLLECTION, Map.class).getMappedResults();
+        log.debug("Error distribution returned {} types", results.size());
+        return results;
     }
 
-    public Map<String, List<Map>> getPvUv(String appId, int hours) {
+    @SuppressWarnings("unchecked")
+    public Map<String, List<Map<String, Object>>> getPvUv(String appId, int hours) {
         Date startTime = new Date(System.currentTimeMillis() - hours * 3600 * 1000L);
         log.debug("Fetching PV/UV: appId={}, hours={}", appId, hours);
 
@@ -85,7 +95,7 @@ public class DashboardService {
                         .count().as("pv"),
                 Aggregation.sort(Sort.by(Sort.Direction.ASC, "_id"))
         );
-        List<Map> pvData = mongoTemplate.aggregate(pvAgg, "behaviors", Map.class).getMappedResults();
+        List<Map<String, Object>> pvData = (List) mongoTemplate.aggregate(pvAgg, BEHAVIOR_COLLECTION, Map.class).getMappedResults();
 
         // UV 聚合
         Aggregation uvAgg = Aggregation.newAggregation(
@@ -103,9 +113,11 @@ public class DashboardService {
                         .count().as("uv"),
                 Aggregation.sort(Sort.by(Sort.Direction.ASC, "_id"))
         );
-        List<Map> uvData = mongoTemplate.aggregate(uvAgg, "behaviors", Map.class).getMappedResults();
+        List<Map<String, Object>> uvData = (List) mongoTemplate.aggregate(uvAgg, BEHAVIOR_COLLECTION, Map.class).getMappedResults();
 
-        Map<String, List<Map>> result = new HashMap<>();
+        log.debug("PV/UV returned {} pv points, {} uv points", pvData.size(), uvData.size());
+
+        Map<String, List<Map<String, Object>>> result = new HashMap<>();
         result.put("pvData", pvData);
         result.put("uvData", uvData);
         return result;

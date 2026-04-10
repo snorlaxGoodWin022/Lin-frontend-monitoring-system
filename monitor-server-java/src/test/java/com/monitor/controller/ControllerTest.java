@@ -188,9 +188,12 @@ class ControllerTest {
     @Test
     @DisplayName("GET /api/dashboard/performance-trend 返回趋势数据")
     void dashboardPerformanceTrend() throws Exception {
-        when(dashboardService.getPerformanceTrend("app1", 24)).thenReturn(List.of());
+        List<Map<String, Object>> emptyTrend = new ArrayList<>();
+        when(dashboardService.getPerformanceTrend("app1", 24)).thenReturn(emptyTrend);
 
-        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService)).build();
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
 
         mvc.perform(get("/api/dashboard/performance-trend").param("appId", "app1"))
                 .andExpect(status().isOk())
@@ -201,9 +204,12 @@ class ControllerTest {
     @Test
     @DisplayName("GET /api/dashboard/error-distribution 返回分布数据")
     void dashboardErrorDistribution() throws Exception {
-        when(dashboardService.getErrorDistribution("app1", 24)).thenReturn(List.of());
+        List<Map<String, Object>> emptyDist = new ArrayList<>();
+        when(dashboardService.getErrorDistribution("app1", 24)).thenReturn(emptyDist);
 
-        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService)).build();
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
 
         mvc.perform(get("/api/dashboard/error-distribution").param("appId", "app1"))
                 .andExpect(status().isOk())
@@ -213,10 +219,14 @@ class ControllerTest {
     @Test
     @DisplayName("GET /api/dashboard/pv-uv 返回 pvData 和 uvData")
     void dashboardPvUv() throws Exception {
-        Map<String, List<Map>> pvUv = Map.of("pvData", List.of(), "uvData", List.of());
+        Map<String, List<Map<String, Object>>> pvUv = new HashMap<>();
+        pvUv.put("pvData", new ArrayList<>());
+        pvUv.put("uvData", new ArrayList<>());
         when(dashboardService.getPvUv("app1", 24)).thenReturn(pvUv);
 
-        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService)).build();
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new DashboardController(dashboardService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
 
         mvc.perform(get("/api/dashboard/pv-uv").param("appId", "app1"))
                 .andExpect(status().isOk())

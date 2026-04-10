@@ -38,7 +38,7 @@ public class DashboardController {
         validateAppId(appId);
         validateHours(hours);
 
-        List<Map> data = dashboardService.getPerformanceTrend(appId, hours);
+        List<Map<String, Object>> data = dashboardService.getPerformanceTrend(appId, hours);
         log.debug("Fetched performance trend for appId={}, hours={}", appId, hours);
         return ResponseEntity.ok(Map.of("success", true, "data", data));
     }
@@ -50,7 +50,7 @@ public class DashboardController {
         validateAppId(appId);
         validateHours(hours);
 
-        List<Map> data = dashboardService.getErrorDistribution(appId, hours);
+        List<Map<String, Object>> data = dashboardService.getErrorDistribution(appId, hours);
         log.debug("Fetched error distribution for appId={}, hours={}", appId, hours);
         return ResponseEntity.ok(Map.of("success", true, "data", data));
     }
@@ -62,7 +62,7 @@ public class DashboardController {
         validateAppId(appId);
         validateHours(hours);
 
-        Map<String, List<Map>> pvUv = dashboardService.getPvUv(appId, hours);
+        Map<String, List<Map<String, Object>>> pvUv = dashboardService.getPvUv(appId, hours);
         log.debug("Fetched PV/UV for appId={}, hours={}", appId, hours);
         return ResponseEntity.ok(Map.of("success", true, "pvData", pvUv.get("pvData"), "uvData", pvUv.get("uvData")));
     }

@@ -54,6 +54,7 @@ public class DataProcessor {
         if (ua instanceof String uaStr) {
             event.put("browser", extractBrowser(uaStr));
             event.put("platform", extractPlatform(uaStr));
+            event.put("device", extractDevice(uaStr));
             event.remove("userAgent");
         }
     }
