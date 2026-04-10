@@ -6,10 +6,11 @@
 
 ```
 Frontend-Monitoring-System/
-├── monitor-sdk/          # 前端监控SDK
-├── monitor-server/       # 后端服务
-├── monitor-dashboard/   # 管理后台
-└── README.md            # 项目说明文档
+├── monitor-sdk/            # 前端监控 SDK
+├── monitor-server/         # 后端服务（Node.js 版）
+├── monitor-server-java/    # 后端服务（Java Spring Boot 版）
+├── monitor-dashboard/      # 管理后台
+└── README.md               # 项目说明文档
 ```
 
 ## 功能特性
@@ -53,25 +54,51 @@ Frontend-Monitoring-System/
 
 ### 1. 启动后端服务
 
-#### 方式一：Docker（推荐）
+提供两个版本的后端服务，API 接口完全一致，可任选其一。
+
+#### Java 版（Spring Boot）
+
+环境要求：JDK 17 + Maven
 
 ```bash
-cd monitor-server
+cd monitor-server-java
+
+# 方式一：Docker 启动（包含 MongoDB + Redis + Java 服务）
 docker-compose up -d
+
+# 方式二：手动启动
+# 先启动 MongoDB 和 Redis
+docker-compose up mongo redis -d
+
+# 编译并运行
+mvn spring-boot:run
 ```
 
-#### 方式二：手动启动
+Java 版项目结构：
+
+```
+monitor-server-java/src/main/java/com/monitor/
+├── MonitorServerApplication.java   # 启动类
+├── config/                         # CORS、Redis 配置
+├── model/                          # MongoDB 文档模型（Performance、Error、Behavior）
+├── repository/                     # Spring Data MongoDB Repository
+├── service/                        # 业务逻辑（数据处理、查询、聚合统计）
+├── controller/                     # REST API 控制器
+└── exception/                      # 全局异常处理
+```
+
+#### Node.js 版（Express）
 
 ```bash
-# 安装依赖
 cd monitor-server
-npm install
 
-# 配置环境变量
+# 方式一：Docker（推荐）
+docker-compose up -d
+
+# 方式二：手动启动
+npm install
 cp .env.example .env
 # 编辑 .env 文件，配置 MongoDB 和 Redis 连接信息
-
-# 启动服务
 npm run dev
 ```
 
@@ -136,11 +163,27 @@ MonitorSDK.track('custom_event', {
 
 ### 后端环境变量
 
+#### Node.js 版（monitor-server/.env）
+
 ```env
 PORT=3000                    # 服务端口
 MONGODB_URI=mongodb://localhost:27017/monitor  # MongoDB连接地址
 REDIS_URI=redis://localhost:6379              # Redis连接地址
 NODE_ENV=development         # 运行环境
+```
+
+#### Java 版（monitor-server-java/src/main/resources/application.yml）
+
+```yaml
+server:
+  port: 3000
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/monitor
+    redis:
+      host: localhost
+      port: 6379
 ```
 
 ## API 接口
@@ -185,11 +228,23 @@ npm run build  # 构建
 
 ### 后端开发
 
+#### Node.js 版
+
 ```bash
 cd monitor-server
 npm install
 npm run dev    # 开发模式（使用 nodemon）
 npm start      # 生产模式
+```
+
+#### Java 版
+
+```bash
+cd monitor-server-java
+mvn compile              # 编译
+mvn spring-boot:run      # 开发模式
+mvn test                 # 运行测试（65 个用例）
+mvn package -DskipTests  # 打包 jar
 ```
 
 ### 前端开发
@@ -237,11 +292,17 @@ docker-compose down
 - Babel - 代码转译
 - Pako - 数据压缩
 
-### 后端
+### 后端（Node.js 版）
 - Express - Web 框架
 - MongoDB - 数据存储
 - Redis - 缓存和队列
 - Mongoose - ODM
+
+### 后端（Java 版）
+- Spring Boot 3.2 - Web 框架
+- Spring Data MongoDB - 数据访问
+- Spring Data Redis (Lettuce) - 缓存
+- Maven - 构建工具
 
 ### 前端
 - Vue 3 - 前端框架
