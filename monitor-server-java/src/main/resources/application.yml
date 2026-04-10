@@ -1,0 +1,25 @@
+server:
+  port: 3000
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/monitor
+      auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+monitor:
+  redis:
+    stats-ttl: 3600
+    stats-key-prefix: "stats:"
+  url:
+    sensitive-params: token,password,key,secret
+
+logging:
+  level:
+    com.monitor: INFO

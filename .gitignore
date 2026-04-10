@@ -70,3 +70,6 @@ Thumbs.db
 
 # Build artifacts
 *.tsbuildinfo
+
+# Java / Maven
+monitor-server-java/target/
